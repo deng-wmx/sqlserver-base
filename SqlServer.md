@@ -138,7 +138,54 @@ create table myuser
 
 ![](images/SqlServer.assets/004.png)
 
+### 什么是关系
 
+这里的关系理解为联系，也是一张二维表
+
+- 定义：表和表之间的联系（实体与实体之间的联系）
+
+- 实现方式：通过设置不同形式的外键来体现表和表不同的关系（联系）
+
+- 分类（按照联系方式的不同）（A对B）
+  - 一对一
+  
+    - 既可以把表A的主键当表B的外键
+    - 也可以把表B的主键当表A的外键
+  
+  - **一对多**
+  
+    - 把A表的主键添加到B表来充当B表的外键
+    - **在多的一方添加外键**
+  
+  - 多对多
+  
+    - 多对多必须通过单独的一张表（第三张表）来表示
+    - 第三张表必须含有主键和外键，且主键大多为多列属性的组合，外键通常也不唯一
+  
+  - ```sql
+    --创建班级表
+    create table grade
+    (
+    	grade_id int primary key,
+    	grade_num int not null,
+    	grade_name nvarchar(30)
+    )
+    --创建老师表
+    create table teacher
+    (
+    	teacher_id int primary key,
+    	teacher_name nvarchar(30)
+    )
+    --第三张表用来模拟老师和班级的关系
+    create table grade_teacher_mapping
+    (
+    	grade_id int constraint fk_grade_id references grade(grade_id),
+    	teacher_id int constraint fk_teacher_id references teacher(teacher_id),
+    	constraint pk_grade_teacher primary key (grade_id, teacher_id)
+    )
+    ```
+  
+    
 
 ### 经验之谈
 

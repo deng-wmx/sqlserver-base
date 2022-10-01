@@ -185,7 +185,142 @@ create table myuser
     )
     ```
   
-    
+
+### 什么是主键
+
+![](images/SqlServer.assets/005.png)
+
+![](images/SqlServer.assets/006.png)
+
+### 什么是外键
+
+![](images/SqlServer.assets/007.png)
+
+![](images/SqlServer.assets/008.png)
+
+### 查询
+
+查询最重要的是顺序
+
+#### 计算列
+
+```sql
+-- 查询一个表中的所有信息
+select * from emp;
+
+-- 为查询的结果起别名，用as as可以省略
+-- 别名建议用双引号引起来
+select ename, EMPNO, sal *12 as "年薪" from emp;
+
+--结果为和emp相同行数的888
+select 888 from emp;
+
+-- 结果为一行的5
+select 5;
+```
+
+- 为字段起别名用双引号 as可以省略
+
+#### distinct
+
+```sql
+--消除重复的deptno
+select distinct deptno from emp;
+
+-- 以deptno和comm的组合来判断是否被消除重复的行
+select distinct deptno, comm from emp;
+
+-- 多行为null也只会输出一个
+select distinct comm from emp;
+
+--这样写会出错，行数可能不匹配
+--select deptno, distinct comm from emp;
+```
+
+#### between
+
+在某个范围之间（包含两个端点）
+
+```sql
+select * from emp
+	where  sal=5000;
+-- 两个等价
+select * from emp
+	where sal>=1500 and sal<=3000;
+
+select *from emp
+	where sal between 1500 and 3000;
+
+select * from emp
+	where sal<1500 or sal>3000;
+
+select * from emp
+	where sal not between 1500 and 3000;
+```
+
+#### in
+
+属于若干个孤立的值
+
+```sql
+select * from emp
+	where sal=1500 or sal=3000 or sal=5000;
+-- 等价于
+select * from emp
+	where sal in (1500, 3000, 5000);
+
+-- not in
+select * from emp
+	where sal not in (1500, 3000, 5000);
+-- 等价于
+select * from emp
+	where sal<>1500 and sal<>3000 and sal<>5000;
+-- 虽然不等于号可以!=这样写，但是建议这样写<>
+```
+
+- 建议不等于号<>这样写
+
+#### top
+
+```sql
+select top 5 * from emp;
+
+-- 当有小数时，向上取整
+select top 5 percent * from emp;
+
+-- 查询工资在1500到3000之间（包括1500到3000）
+-- 的员工中最高工资对的前四个
+select top 4 * from emp
+	where sal between 1500 and 3000
+	order by sal desc;
+```
+
+- 输出前几个，当有小数时向上取整
+- 后面分页查询可能会用到
+
+#### null
+
+没有值，空值
+
+```sql
+-- 查询奖金为空的员工的信息
+select * from emp
+	where comm is null;
+
+-- 查询奖金不为空的员工的信息
+select * from emp
+	where comm  is not null;
+
+-- 查询所有员工的年薪
+-- select ename, sal * 12 +comm as "年薪" from emp;错误写法
+select ename, sal * 12 + ISNULL(comm, 0) as "年薪" from emp;
+```
+
+- 0和空值是不一样的，null表示空值，没有值，0表示一个确定的值
+- null不能参与如下运算: <> != =
+- null可以参与如下运算：is not is
+- null不能参与数据运算，否则结果为空
+- ISNULL函数，如果为空，返回第二个指定的值，否则返回第一个参数的值
 
 ### 经验之谈
 
@@ -196,4 +331,4 @@ create table myuser
   - **不要用有实际意义的属性当主键，一般再增加一列没有实际意义的序号作为该关系的主键**（不要用业务逻辑当主键，用代理主键当主键）
   - 将原本具有实际意义的主键/不允许重复的键（一般为单个属性）当作唯一键
 - 关系与关系的联系，通过外键来互通  外键<==>来自
-- 单引号表示字符串，双引号表示对象的名字
+- **单引号表示字符串，双引号表示对象的名字**

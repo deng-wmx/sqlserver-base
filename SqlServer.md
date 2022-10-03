@@ -322,6 +322,113 @@ select ename, sal * 12 + ISNULL(comm, 0) as "年薪" from emp;
 - null不能参与数据运算，否则结果为空
 - ISNULL函数，如果为空，返回第二个指定的值，否则返回第一个参数的值
 
+#### order by
+
+以某个字段排序
+
+```sql
+select * from emp order by sal; -- 默认位升序排序
+select * from emp order by sal asc; --asc 表示升序排序
+select * from emp order by sal desc ;--desc 表示降序排序
+
+-- 先以第一字段排序，第一字段相同再按第二字段排序，不指定默认为升序
+select * from emp order by deptno desc, sal; 
+```
+
+#### 模糊查询
+
+```sql
+-- 查询名字含有A的员工的所有信息
+
+-- % 表示任意多个字符（0个或者多个）
+select * from emp 
+	where ename like '%A%';
+select * from
+
+-- - 表示任意的单个字符
+select * from emp 
+	where ename like '__A%';
+	
+-- [a-f] 表示a到f的之间的单个字母（不区分大小写）
+select * from emp 
+	where ename like '_[a-f]A%';
+-- [a,b,c] 表示或，单个字符
+-- [^a-z] ^表示取反
+
+-- 通配符的转义
+select * from student
+	where name like '%\%%' escape '\';
+	
+select * from student
+	where name like '_\_%' escape '\';
+```
+
+- 主要要用单引号
+
+#### 聚合函数
+
+![](images/SqlServer.assets/009.png)
+
+![](images/SqlServer.assets/010.png)
+
+```sql
+-- 都是多行函数，最终返回一个值，不矛盾
+select max(sal) as "最高工资", min(sal) as "最低工资", count(*) as "员工个数" from emp;
+
+-- 有单行函数，有多行函数，矛盾
+select max(sal), lower(ename) from emp;
+```
+
+- 单行函数，针对某一行，一行一行的处理，返回多行
+- 多行函数，针对多行一起处理，返回一个值
+- 函数本能的反应就是括号
+
+#### grunp by
+
+![](images/SqlServer.assets/011.png)
+
+```sql
+-- 以一个字段分组
+select deptno, AVG(sal) as '部门平均工资'
+	from emp
+	group by deptno;
+
+-- 以多个字段分组
+select deptno, job, AVG(sal) as '平均工资'
+	from emp
+	group by deptno, job
+	order by deptno;
+```
+
+- 分组之后，将会以这个组作为一个整体进行处理
+- 分组查询：以谁分组，那么查询的字段就写谁
+- 分组查询常常和聚合函数一起使用，达到统计数据的目的
+
+#### having
+
+分组后的条件判断
+
+```sql
+select deptno, avg(sal) as '平均工资'
+	from emp
+	group by deptno
+	having avg(sal) > 2000;
+```
+
+- having就是对分组后再进行条件的筛选，having后面的字段和grounp后面所要求的字段一致
+
+```sql
+-- 查询名字不含A，然后以deptno分组后的所有部门编号和平均工资
+select deptno, avg(sal) as '平均工资'
+	from emp
+	where ename not like '%A%'
+	group by deptno
+	having avg(sal) > 2000;
+```
+
+- where是分组前的条件判断，且where不能和聚合函数一起使用
+- having是分组后的条件判断，having一般要和聚合函数一起使用
+
 ### 经验之谈
 
 - **设计一个表必须有主键，主键不能为空**

@@ -429,6 +429,41 @@ select deptno, avg(sal) as '平均工资'
 - where是分组前的条件判断，且where不能和聚合函数一起使用
 - having是分组后的条件判断，having一般要和聚合函数一起使用
 
+#### 连接查询
+
+将两个表或者两个以上的表一一定的连接条件连接起来从中检索出满足条件的数据
+
+##### 内连接
+
+- ![](images/SqlServer.assets/012.png)
+
+  ```sql
+  -- 1. select ... from A, B （笛卡尔积）
+  -- a表中的所有行，连接B表中的每一行
+  -- 相当于无条件的连接
+  select * from emp, dept;
+  
+  -- 2.select ... from A, B where（在笛卡尔积上筛选）
+  select * 
+  	from emp, dept
+  	where empno = 7369;
+  -- 3.select ... from A join B on ...
+  select * 
+  	from emp "E"
+  	join dept "D"
+  	on  "E".deptno = "D".deptno
+  
+  
+  select "D".deptno as "部门编号", "E".sal as "员工工资"
+  	from dept "D"
+  	join emp "E"
+  	on "D".deptno = "E".deptno; 
+  ```
+  
+  - 连接查询一般要为表起一个别名（用双引号）
+  - 等值连接查询结果的行数，取决于含有外键的那张表
+- 哪个表写在前面，那么相应的结果也在前面
+
 ### 经验之谈
 
 - **设计一个表必须有主键，主键不能为空**

@@ -4,11 +4,11 @@
 
 - 数据库作为第四代语言，可以认为，我们输入的sql语句就是一个命令，（命令式语言）
 
-<img src="images/SqlServer.assets/002.png" style="zoom: 80%;" />
+<img src="images/002.png" style="zoom: 80%;" />
 
 ### 为什么学习数据库
 
-<img src="images/SqlServer.assets/001.png"  />
+<img src="images/001.png"  />
 
 - 从某种方面来说，数据本事，比应用程序软件更加重要。也即实现某一个应用程序的技术不是很难，但是处理这个应用程序背后的数据是非常不易的。
 
@@ -112,7 +112,7 @@ create table emp
 
 - 万物皆对象，约束也是一个对象，具有对象名
 
-<img src="images/SqlServer.assets/003.png" style="zoom: 80%;" />
+<img src="images/003.png" style="zoom: 80%;" />
 
 - check约束：保证事物的取值在合法的范围之内
 - default约束：保证事物的属性一定有一个值，但是**在插入数据时，要指定其他的列**
@@ -136,7 +136,7 @@ create table myuser
 
 ### 表和约束的区别
 
-![](images/SqlServer.assets/004.png)
+<img src="images/004.png" style="zoom: 80%;" />
 
 ### 什么是关系
 
@@ -188,15 +188,15 @@ create table myuser
 
 ### 什么是主键
 
-![](images/SqlServer.assets/005.png)
+![](images/005.png)
 
-![](images/SqlServer.assets/006.png)
+![](images/006.png)
 
 ### 什么是外键
 
-![](images/SqlServer.assets/007.png)
+![](images/007.png)
 
-![](images/SqlServer.assets/008.png)
+![](images/008.png)
 
 ### 查询
 
@@ -367,9 +367,9 @@ select * from student
 
 #### 聚合函数
 
-![](images/SqlServer.assets/009.png)
+![](images/009.png)
 
-![](images/SqlServer.assets/010.png)
+![](images/010.png)
 
 ```sql
 -- 都是多行函数，最终返回一个值，不矛盾
@@ -385,7 +385,7 @@ select max(sal), lower(ename) from emp;
 
 #### grunp by
 
-![](images/SqlServer.assets/011.png)
+![](images/011.png)
 
 ```sql
 -- 以一个字段分组
@@ -435,7 +435,7 @@ select deptno, avg(sal) as '平均工资'
 
 ##### 内连接
 
-- ![](images/SqlServer.assets/012.png)
+- ![](images/012.png)
 
   ```sql
   -- 1. select ... from A, B （笛卡尔积）
@@ -447,10 +447,11 @@ select deptno, avg(sal) as '平均工资'
   select * 
   	from emp, dept
   	where empno = 7369;
-  -- 3.select ... from A join B on ...
+  	
+  -- 3.select ... from A join B on ...（结果的列数为和含有外键的那个表写的列数相同）
   select * 
   	from emp "E"
-  	join dept "D"
+  	join dept "D" -- join连接
   	on  "E".deptno = "D".deptno
   
   
@@ -458,10 +459,104 @@ select deptno, avg(sal) as '平均工资'
   	from dept "D"
   	join emp "E"
   	on "D".deptno = "E".deptno; 
+  	
+  -- 4.不同的连接查询标准
+  
+  -- 92标准
+  select *
+  	from emp,dept
+  	where dept.deptno = emp.deptno;
+  
+  -- 99标准（推荐使用）
+  select * from emp
+  	join dept
+  	on emp.deptno = dept.deptno;
+  	
+  -- 5. 例子
+  select * 
+  	from emp "E"
+  	join dept "D"
+  	on "E".deptno = "D".deptno
+  	where "E".sal > 2000;
+  
+  select *
+  	from emp, dept
+  	where emp.deptno = dept.deptno and emp.sal > 1200;
+  	
+  -- 6.三个表查询
+  select *
+  	from emp "E"
+  	join dept "D"
+  	on "E".deptno = "D".deptno
+  	join SALGRADE "S"
+  	on "E".sal between "S".LOSAL and "S".HISAL
+  	-- on "E".sal >= "S".LOSAL and "E".sal <= "S".HISAL
+  	where "E".sal > 2000;
+  -- 7.习题
+  -- 1. 求出每个员工的姓名，部门编号，薪水和薪水的等级
+  select "E".ename as "姓名", "D".deptno as "部门编号"
+  , "E".sal as "薪水", "S".GRADE as "薪水等级"
+  	from emp "E"
+  	join dept "D"
+  	on "E".deptno = "D".deptno
+  	join SALGRADE "S"
+  	on "E".sal between "S".LOSAL and "S".HISAL;
+  -- 2. 查找每个部门的编号，该部门所有员工的平均工资，平均工资的等级
+  select "T".deptno, "T".平均工资, "S".GRADE 
+  	from(
+  		select deptno, avg(sal) as "平均工资"
+  			from emp
+  			group by emp.deptno
+  	) "T"
+  	join SALGRADE "S"
+  	on "T".平均工资 between "S".LOSAL and "S".HISAL;
+  -- 3. 在2的基础上加上部门名称
+  select "T".deptno, "T".平均工资, "S".GRADE, "D".dname as "部门名称"
+  	from(
+  		select deptno, avg(sal) as "平均工资"
+  			from emp
+  			group by emp.deptno
+  	) "T"
+  	join SALGRADE "S"
+  	on "T".平均工资 between "S".LOSAL and "S".HISAL
+  	join dept "D"
+  	on "T".deptno = "D".deptno;
+  -- 4. 求出emp表中所有领导的姓名
+  
+  -- 这种方式复杂并且有弊端
+  select distinct "E2".ename
+  	from emp "E1"
+  	join emp "E2"
+  	on "E1".mgr = "E2".EMPNO;
+  -- not和in连用可能会出错
+  select *
+  	from emp
+  	where empno in (select mgr from emp);
+  -- 5. 求出平均薪水最高的部门的编号和部门的平均工资
+  select top(1) deptno, avg(sal) from emp
+  	group by emp.deptno
+  	order by AVG(sal) desc;
+  
+  -- 6. 把工资大于所有员工中工资最低的人中的前3个人的姓名，工资，部门编号，部门名称，工资等级输出
+  -- 翻译，有一个人工资最低，把这个人排除掉，剩下的人中工资最低的前3个人的，，，
+  select top 3 *
+  	from(
+  		select * from  emp 
+  			where sal > (select min (sal) from emp)
+  	) "T"
+  	join dept "D"
+  	on "T".deptno = "D".deptno
+  	join SALGRADE "S"
+  	on "T".sal between "S".LOSAL and "S".HISAL
+  	order by "T".sal asc;
   ```
+  
+  ![](images/013.jpg)
   
   - 连接查询一般要为表起一个别名（用双引号）
   - 等值连接查询结果的行数，取决于含有外键的那张表
+  - 查询的结果也可以作为一张表和其他表进行连接
+  - 上面有的例子是嵌套查询，都是不相关子查询
 - 哪个表写在前面，那么相应的结果也在前面
 
 ### 经验之谈

@@ -428,12 +428,15 @@ select deptno, avg(sal) as '平均工资'
 
 - where是分组前的条件判断，且where不能和聚合函数一起使用
 - having是分组后的条件判断，having一般要和聚合函数一起使用
+- having里面的字段不能用别名
 
 #### 连接查询
 
 将两个表或者两个以上的表一一定的连接条件连接起来从中检索出满足条件的数据
 
 ##### 内连接
+
+满足连接条件的记录返回
 
 - ![](images/012.png)
 
@@ -549,6 +552,21 @@ select deptno, avg(sal) as '平均工资'
   	join SALGRADE "S"
   	on "T".sal between "S".LOSAL and "S".HISAL
   	order by "T".sal asc;
+  
+  -- 7. 把工资大于1500的所有的员工按部门分组之后，然后把部门平均工资大于2000的最高的前2个的部门的编号，部门的名称，部门平均工资的等级输出
+  select "D".deptno as "部门编号","T".平均工资, "D".dname as "部门名称", "S".GRADE as "工资等级"
+  	from dept "D"
+  	join(
+  		select top 2 deptno, AVG(sal) as "平均工资" from emp
+  			where sal > 1500
+  			group by deptno
+  			having AVG(sal) > 2000
+  			order by AVG(sal) desc
+  	) "T"
+  	on "D".deptno = "T".deptno
+  	join SALGRADE "S"
+  	on "T".平均工资 between "S".LOSAL and "S".HISAL;
+  -- 写连接查询时最好先过滤，再连接
   ```
   
   ![](images/013.jpg)
@@ -557,7 +575,68 @@ select deptno, avg(sal) as '平均工资'
   - 等值连接查询结果的行数，取决于含有外键的那张表
   - 查询的结果也可以作为一张表和其他表进行连接
   - 上面有的例子是嵌套查询，都是不相关子查询
+  - 在内连接查询中，推荐使用sql99标准，并且，on推荐只写连接条件，然后，通过where对连接后的临时表进行过滤
 - 哪个表写在前面，那么相应的结果也在前面
+- 查询的顺序
+- ```sql
+  select * from A
+  	join B
+  	on(连接条件)
+  	join C
+  	on(连接条件)
+  	where(对连接的临时表过滤)
+  	group by(运用分组查询后，注意最终查询的字段要一致)
+  	having(分组后过滤)
+  	order by(desc降序，asc升序)
+  ```
+
+##### 外连接
+
+左外连接和右外连接相反，原理类似
+
+![](images/14.jpg)
+
+- 左外连接的原理
+
+  <img src="images/15.jpg" style="zoom:67%;" />
+
+- 左外连接的意义
+
+  <img src="images/16.jpg" style="zoom:67%;" />
+
+- ```sql
+  select * from dept
+  	left join emp
+  	on dept.deptno = emp.deptno;
+  -- 结果为16行，因为部门编号为10 20 30分别对应了emp表的14行，还有两行为空
+  ```
+
+- 左外连接的结果
+
+  - 左外连接一定会输出左表的所有信息
+  - 左外连接最后的行数至少是左表的行数，但不一定是左表行数的倍数
+
+##### 完全连接
+
+- 结果集
+
+  ![](images/17.jpg)
+
+- 结果：相当于内连接，左外连接，右外连接的三者的并集
+
+##### 交叉连接
+
+笛卡尔积
+
+```sql
+select * from emp
+	cross join dept;
+	
+select * from emp, dept;
+-- 两者等价
+```
+
+
 
 ### 经验之谈
 

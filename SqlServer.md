@@ -192,6 +192,8 @@ create table myuser
 
 ![](images/006.png)
 
+- 主键是否是连续增长的不是很重要，主键就是为了唯一标识一行记录
+
 ### 什么是外键
 
 ![](images/007.png)
@@ -636,7 +638,65 @@ select * from emp, dept;
 -- 两者等价
 ```
 
+##### 自连接
 
+自己和自己连接（用的不多）
+
+```sql
+-- 不用聚合函数，查出员工工资最高的信息
+
+-- 使用聚合函数
+select * from emp
+	where sal = (select MAX(sal) from emp);
+
+-- 不适用聚合函数
+select * from emp
+	where EMPNO not in (
+		select distinct "E1".EMPNO
+			from emp "E1"
+			join emp "E2"
+			on "E1".sal < "E2".sal
+	);
+```
+
+- 首先，利用自连接，求出齐补集，然后利用not in进行筛选
+
+##### 联合
+
+表与表之间的数据纵向的连接在一起，所以需要要求，这两个表的列数要对应
+
+```sql
+
+-- 输出每个员工的姓名，工资，上司的姓名
+select "E1".ename, "E1".sal, "E2".ename
+	from emp "E1" -- 当作员工表
+	join emp "E2" -- 当作上司表
+	on "E1".mgr = "E2".EMPNO
+union
+select ename , sal, '他是老板' 
+	from emp where mgr is null;
+```
+
+- 联合的条件
+  - 联合的两个表的列数是相同的
+  - 联合的两个表的行数的数据类型至少是相同的，一般都是一样的
+- 联合的两个表，并没有直接的关系
+
+##### 分页查询
+
+当查询结果比较多的时候，需要分页显示
+
+```sql
+-- 每一页三行记录三行记录的显示
+select top 3 * from emp
+	order by sal desc;
+
+select top 3 * from emp
+	where EMPNO not in (select top 3 EMPNO from emp order by sal desc)
+	order by sal desc;
+```
+
+- 一页一页的显示数据
 
 ### 经验之谈
 
